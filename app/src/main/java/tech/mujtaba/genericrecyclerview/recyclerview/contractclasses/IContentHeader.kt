@@ -2,6 +2,9 @@ package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
 import java.util.*
 
+/**
+ * This interface represents a cell in a recycler view which is also a header to other IContentChild Objects
+ */
 interface IContentHeader : IContent {
 
     /**

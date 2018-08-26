@@ -2,6 +2,7 @@ package tech.mujtaba.genericrecyclerview.recyclerview.layoutmanagers
 
 import android.content.Context
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import tech.mujtaba.genericrecyclerview.recyclerview.GenericRecyclerView
 
 

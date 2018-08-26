@@ -37,14 +37,4 @@ class EmptyIContent(override var model: String) : IContent, IModel<String> {
         messageText.text = model
     }
 
-    /**
-     * Overridden setter because we don't need it
-     */
-    override var contents: MutableList<IContent>? = null
-        set(value) {}
-    /**
-     * Overridden setter because we don't need it
-     */
-    override var parent: IContent? = null
-        set(value) {}
 }

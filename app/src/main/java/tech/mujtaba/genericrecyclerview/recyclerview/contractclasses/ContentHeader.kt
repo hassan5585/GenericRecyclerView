@@ -11,9 +11,9 @@ abstract class ContentHeader : IContentHeader {
         set(value) {
             if (value != null) {
                 field.clear()
-                for (c in value) {
-                    field.add(c)
-                    c.parent = this
+                value.forEach {
+                    field.add(it)
+                    it.parent = this
                 }
             }
         }
