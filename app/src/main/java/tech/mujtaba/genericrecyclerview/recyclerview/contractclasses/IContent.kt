@@ -1,9 +1,7 @@
-package tech.mujtaba.genericrecyclerview.recyclerview
+package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
 import android.view.View
-import java.util.*
 import kotlin.Comparator
-import kotlin.collections.HashMap
 
 /**
  * This interface represents one cell of a recyclerView and it is meant to be used with a GenericRecyclerView
@@ -60,13 +58,7 @@ interface IContent {
      */
     fun getItemType(): Int
 
-    fun getCount(): Int {
-        var count = 1
-        contents?.let {
-            count += it.size
-        }
-        return count
-    }
+
 
     /**
      * Return a position this content cell would like to have within its parent
@@ -90,93 +82,8 @@ interface IContent {
      */
     fun populateView(view: View)
 
-    /**
-     * Will return true if this Content has a list of other contents it wants to show
-     * If the list is null or empty, it will return false
-     */
-    fun hasContent(): Boolean {
-        contents?.let {
-            if (it.isNotEmpty()) {
-                return true
-            }
-            return false
-        }
-        return false
-    }
-
-    /**
-     * Call this function to make sure your children know of you as a parent
-     */
-    fun assignParentToChildren(){
-        contents?.let {
-            for (c in it) {
-                c.parent = this
-            }
-        }
-    }
-
-    /**
-     * Call this function to remove yourself as a parent from children
-     */
-    fun removeParentFromChildren(){
-        contents?.let {
-            for (c in it) {
-                c.parent = null
-            }
-        }
-    }
-
-    /**
-     * Will return true if this object has a parent
-     */
-    fun hasParent(): Boolean {
-        parent?.let {
-            return true
-        }
-        return false
-    }
-
-    /**
-     * Return a list of contents that will appear below this one. This will then act as a header
-     * for the returned list
-     */
-    var contents : MutableList<IContent>?
 
 
-    /**
-     * Sorts children based on the default comparator. If the default comparator is not suitable,
-     * provide a different one in getComparator function
-     */
-    fun sort() {
-        contents?.let {
-            Collections.sort(it, getComparator())
-        }
-    }
-
-    /**
-     * Override this function to provide your own comparator. Remember to remove superclass version
-     * before returning. This comparator is for how this parent wants to sort its children
-     */
-    fun getComparator() : Comparator<IContent> {
-        return comparator
-    }
-
-
-    /**
-     * Sets a list of children and stores them in the contents variable. Also make sure those children know
-     * of this object as a parent. Do not set the contents variable directly,If you do, you will have to make sure the children
-     * know about their parent. Use this function instead
-     */
-    fun <T : IContent> setChildren(list: MutableList<T>?){
-        list?.let {
-            if (contents == null) {
-                contents = mutableListOf()
-            }
-            contents?.clear()
-            contents?.addAll(list)
-            assignParentToChildren()
-        }
-    }
 
 
     /**
@@ -192,10 +99,7 @@ interface IContent {
      */
     val clickListener : IClickListener?
 
-    /**
-     * The parent object for this IContent object
-     */
-    var parent : IContent?
+
 
     companion object {
 
@@ -210,8 +114,8 @@ interface IContent {
             val tempList: MutableList<IContent> = mutableListOf()
             for (t in list) {
                 tempList.add(t)
-                if (t.hasContent()) {
-                    t.contents?.let {
+                if (t is IContentHeader) {
+                    t.children?.let {
                         tempList.addAll(flattenList(it))
                     }
                 }
@@ -223,7 +127,7 @@ interface IContent {
          * TODO WIP Unflattens the list provided and returns it. The method seems
          * complete but I have to still test it
          */
-        fun unFlattenList(list: List<IContent>): MutableList<IContent> {
+        /*fun unFlattenList(list: List<IContent>): MutableList<IContent> {
             val map : HashMap<IContent, MutableList<IContent>?> = hashMapOf()
             val tempList: MutableList<IContent> = mutableListOf()
             for (t in list) {
@@ -246,7 +150,7 @@ interface IContent {
                 }
             }
             return tempList
-        }
+        }*/
 
     }
 

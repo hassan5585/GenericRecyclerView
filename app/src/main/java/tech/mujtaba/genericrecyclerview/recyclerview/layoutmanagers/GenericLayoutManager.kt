@@ -1,7 +1,8 @@
-package tech.mujtaba.genericrecyclerview.recyclerview
+package tech.mujtaba.genericrecyclerview.recyclerview.layoutmanagers
 
 import android.content.Context
 import android.support.v7.widget.GridLayoutManager
+import tech.mujtaba.genericrecyclerview.recyclerview.GenericRecyclerView
 
 
 /**

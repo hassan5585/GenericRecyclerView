@@ -3,13 +3,15 @@ package tech.mujtaba.genericrecyclerview.recyclerview
 import android.view.View
 import android.widget.TextView
 import tech.mujtaba.genericrecyclerview.R
+import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IModel
 
 /**
  * An empty cell that you can provide to the generic recycler view for it to show
  * when filtering results in an empty list. You can provide your own version of this.
  * But this is just here to make stuff easier
  */
-class EmptyIContent(override var model: String) : IContent, IModel<String>{
+class EmptyIContent(override var model: String) : IContent, IModel<String> {
     override val clickListener: IContent.IClickListener? = null
 
     private companion object {

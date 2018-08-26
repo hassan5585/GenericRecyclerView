@@ -1,4 +1,4 @@
-package tech.mujtaba.genericrecyclerview.recyclerview
+package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
 /**
  * A model interface that provides you an immutable value. This can be used with IContent
