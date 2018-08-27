@@ -12,6 +12,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentHeader
 
 open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                                attrs: AttributeSet? = null,
@@ -76,20 +77,20 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      Otherwise, every parent in the listUsedForAdapter will be asked to sort its children
      Also, any filter that you have applied will be removed if you call this function
       */
-    fun sort(parent: IContent? = null) {
+    fun sort(parent: IContentHeader? = null) {
         adapter?.let {
             resetFilter()
             val tempList: MutableList<IContent> = mutableListOf()
             tempList.addAll(unFlattenedList)
             if (parent == null) {
                 for (content in tempList) {
-                    if (content.hasContent()) {
+                    if (content is IContentHeader) {
                         content.sort()
                     }
                 }
             } else {
                 for (content in tempList) {
-                    if (content.hasContent() && content == parent) {
+                    if (content is IContentHeader && content == parent) {
                         content.sort()
                     }
                 }
