@@ -107,12 +107,10 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      */
     fun scrollToContent(content: IContent, isSmooth: Boolean = false) {
         if (!isSmooth) {
-            if (layoutManager is LinearLayoutManager) {
-                (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(listUsedForAdapter.indexOf(content), 0)
-            } else if (layoutManager is GridLayoutManager) {
-                (layoutManager as GridLayoutManager).scrollToPositionWithOffset(listUsedForAdapter.indexOf(content), 0)
-            } else {
-                layoutManager?.scrollToPosition(listUsedForAdapter.indexOf(content))
+            when (layoutManager) {
+                is LinearLayoutManager -> (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(listUsedForAdapter.indexOf(content), 0)
+                is GridLayoutManager -> (layoutManager as GridLayoutManager).scrollToPositionWithOffset(listUsedForAdapter.indexOf(content), 0)
+                else -> layoutManager?.scrollToPosition(listUsedForAdapter.indexOf(content))
             }
         } else {
             // TODO Add smooth scrolling code here
