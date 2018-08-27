@@ -124,33 +124,11 @@ interface IContent {
         }
 
         /**
-         * TODO WIP Unflattens the list provided and returns it. The method seems
-         * complete but I have to still test it
+         * Un-flattens the list provided and returns it.
          */
-        /*fun unFlattenList(list: List<IContent>): MutableList<IContent> {
-            val map : HashMap<IContent, MutableList<IContent>?> = hashMapOf()
-            val tempList: MutableList<IContent> = mutableListOf()
-            for (t in list) {
-                if (t.hasParent()) {
-                    if (map.containsKey(t.parent)) {
-                        map[t.parent]?.add(t)
-                    }else {
-                        map[t.parent!!] = mutableListOf(t)
-                    }
-                }else {
-                    map[t] = mutableListOf()
-                }
-            }
-            for ((key, value) in map) {
-                tempList.add(key)
-                value?.let {
-                    if (it.isNotEmpty()) {
-                        tempList.addAll(it)
-                    }
-                }
-            }
-            return tempList
-        }*/
+        fun unFlattenList(list: List<IContent>): List<IContent> {
+            return list.filter { it is IContentHeader }
+        }
 
     }
 
