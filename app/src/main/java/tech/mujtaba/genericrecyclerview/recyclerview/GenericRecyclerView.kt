@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import tech.mujtaba.genericrecyclerview.R
 import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
 import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentHeader
 
@@ -23,7 +24,6 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
     private var unFilteredList: MutableList<IContent> = mutableListOf()
     private var unFlattenedList: MutableList<IContent> = mutableListOf()
     private val viewMapWithResourceIds: MutableMap<Int, Int> = mutableMapOf()
-    private val viewMapWithViewObjects: MutableMap<Int, View> = mutableMapOf()
     private var adapter: GenericAdapter? = null
     private var isInFilteredState = false
 
@@ -280,12 +280,8 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      */
     private fun createViewMapping(list: List<IContent>) {
         viewMapWithResourceIds.clear()
-        viewMapWithViewObjects.clear()
         for (content in list) {
             viewMapWithResourceIds[content.getItemType()] = content.getViewResource()
-            if (content.getViewResource() == 0) {
-                viewMapWithViewObjects[content.getItemType()] = content.getViewObject() ?: View(context)
-            }
         }
     }
 
@@ -302,19 +298,10 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
 
     private inner class GenericAdapter : Adapter<GenericViewHolder>() {
 
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder {
             val viewInflateId = viewMapWithResourceIds[viewType]
-            if (viewInflateId == null || viewInflateId == 0) {
-                viewMapWithViewObjects[viewType]?.let {
-                    return GenericViewHolder(it)
-                }
-            } else {
-                return GenericViewHolder(LayoutInflater.from(context).inflate(viewInflateId, parent, false))
-            }
-            //If correctly implemented IContent objects are provided, this should not occur
             return GenericViewHolder(LayoutInflater.from(context).inflate(viewInflateId
-                    ?: 0, parent, false))
+                    ?: R.layout.empty_recycler_view_item, parent, false))
         }
 
         override fun getItemViewType(position: Int): Int {

@@ -48,9 +48,15 @@ interface IContentHeader : IContent {
      * Override this function to provide your own comparator. Remember to remove superclass version
      * before returning. This comparator is for how this parent wants to sort its children
      */
-    fun getComparator() : Comparator<IContent> {
-        return IContent.comparator
+    fun getComparator() : Comparator<IContentChild> {
+        return comparator
     }
 
+
+    companion object {
+        val comparator: Comparator<IContentChild> = Comparator { i1, i2 ->
+            i1.getPreferredPositionInParent() - i2.getPreferredPositionInParent()
+        }
+    }
 
 }

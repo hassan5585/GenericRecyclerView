@@ -14,13 +14,13 @@ interface IContent {
      */
     fun getViewResource(): Int
 
-    /**
+  /*  *//**
      * Return a view object that will be attached to the recyclerview. Use this method instead of getViewResource()
      * if you want to use a custom view. Do not use both
-     */
+     *//*
     fun getViewObject() : View? {
         return null
-    }
+    }*/
 
     /**
      * Will be automatically invoked when this cell is clicked. If you want to react to the click,
@@ -61,15 +61,6 @@ interface IContent {
 
 
     /**
-     * Return a position this content cell would like to have within its parent
-     * By default, all children will have the same sorting order. So their order depends
-     * before sorting, on the order they have in the list of contents
-     */
-    fun getPreferredPositionInParent(): Int {
-        return 0
-    }
-
-    /**
      * Override and initialize your views here. This method is guaranteed to be called before
      * populateView so you can get and store references to your views here.
      */
@@ -81,9 +72,6 @@ interface IContent {
      * according to any data that you may have
      */
     fun populateView(view: View)
-
-
-
 
 
     /**
@@ -102,10 +90,6 @@ interface IContent {
 
 
     companion object {
-
-        val comparator: Comparator<IContent> = Comparator { i1, i2 ->
-            i1.getPreferredPositionInParent() - i2.getPreferredPositionInParent()
-        }
 
         /**
          * Convenience method to flatten a list of IContent objects
@@ -127,7 +111,7 @@ interface IContent {
          * Un-flattens the list provided and returns it.
          */
         fun unFlattenList(list: List<IContent>): List<IContent> {
-            return list.filter { it is IContentHeader }
+            return list.filter { it !is IContentChild }
         }
 
     }
