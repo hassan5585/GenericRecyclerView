@@ -6,8 +6,10 @@ package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
  */
 interface IModel<T> {
     val model : T
-
-
+    
+    /**
+     * A compare to function that can be used in place of equals
+     */
     fun compareTo(providedModel: Any?) : Boolean{
         if(providedModel == null) return false
         if(providedModel !is IModel<*>) return false

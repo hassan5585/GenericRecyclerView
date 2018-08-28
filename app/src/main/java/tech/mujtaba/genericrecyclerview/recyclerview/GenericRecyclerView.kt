@@ -231,7 +231,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      * @param filterPredicate This is a function that takes in a IContent value and returns a boolean
      * If it returns true for a value, that will be added to the listUsedForAdapter, otherwise it will be removed
      * If you pass in a null to this function, it will clear all filters and return to the original
-     * state of the last
+     * state of the list
      */
     fun filter(filterPredicate: ((content: IContent) -> Boolean)?) {
         if (filterPredicate != null) {
