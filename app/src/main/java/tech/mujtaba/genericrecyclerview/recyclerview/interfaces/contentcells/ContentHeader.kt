@@ -1,4 +1,4 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
+package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
 
 
 /**

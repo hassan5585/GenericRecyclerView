@@ -1,4 +1,4 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
+package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
 
 /**
  * Represent one cell that is a child of some other cell of type IContentHeader

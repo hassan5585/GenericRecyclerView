@@ -1,7 +1,9 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
+package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
 
 import android.view.View
-import kotlin.Comparator
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 
 /**
  * This interface represents one cell of a recyclerView and it is meant to be used with a GenericRecyclerView
@@ -13,14 +15,6 @@ interface IContent {
      * return it back in the populateView function
      */
     fun getViewResource(): Int
-
-  /*  *//**
-     * Return a view object that will be attached to the recyclerview. Use this method instead of getViewResource()
-     * if you want to use a custom view. Do not use both
-     *//*
-    fun getViewObject() : View? {
-        return null
-    }*/
 
     /**
      * Will be automatically invoked when this cell is clicked. If you want to react to the click,
@@ -94,7 +88,7 @@ interface IContent {
         /**
          * Convenience method to flatten a list of IContent objects
          */
-        fun flattenList(list: List<IContent>): MutableList<IContent> {
+        fun flattenList(list: List<IContent>): List<IContent> {
             val tempList: MutableList<IContent> = mutableListOf()
             for (t in list) {
                 tempList.add(t)
@@ -105,6 +99,16 @@ interface IContent {
                 }
             }
             return tempList
+        }
+
+        /**
+         * Wraps the flattenlist function in an observable for easier flattening on a
+         * background thread
+         */
+        fun flattenListObservable(list: List<IContent>) : Single<List<IContent>>{
+            return Single.defer {
+                Single.just(flattenList(list))
+            }.subscribeOn(Schedulers.io())
         }
 
         /**

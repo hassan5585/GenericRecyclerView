@@ -1,7 +1,7 @@
 package tech.mujtaba.genericrecyclerview.recyclerview
 
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IModel
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 import kotlin.reflect.KClass
 
 class Extensions {
@@ -12,7 +12,7 @@ class Extensions {
      */
     fun <T : Any> IContent.isTypeOf(clazz: KClass<T>) : Boolean{
         if (this !is IModel<*>) return false
-        this.model?.let {
+        model?.let {
             return it::class == clazz
         }
         return false
@@ -20,8 +20,16 @@ class Extensions {
 
     /**
      * Don't call this method unless you have checked the type using isTypeOf function
+     * @throws ClassCastException
      */
     fun <T : Any> IContent.getModel() : T{
         return ((this as IModel<*>).model) as T
+    }
+
+    /**
+     * Convenience method to flatten a list
+     */
+    fun List<IContent>.flatten() : List<IContent>{
+        return IContent.flattenList(this)
     }
 }

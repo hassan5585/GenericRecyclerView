@@ -12,8 +12,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import tech.mujtaba.genericrecyclerview.R
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentHeader
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContentHeader
 
 open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                                attrs: AttributeSet? = null,

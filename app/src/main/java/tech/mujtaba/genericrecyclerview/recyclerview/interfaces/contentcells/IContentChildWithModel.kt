@@ -1,4 +1,6 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
+package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
+
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 
 /**
  * Convenience interface that works with a model object and behaves like a child
