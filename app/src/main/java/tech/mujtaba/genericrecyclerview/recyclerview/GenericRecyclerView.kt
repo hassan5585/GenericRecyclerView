@@ -56,7 +56,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                 listUsedForAdapter.clear()
                 unFlattenedList.clear()
                 unFlattenedList.addAll(it)
-                listUsedForAdapter = flattenList(it)
+                listUsedForAdapter.addAll(flattenList(it))
                 createViewMapping(listUsedForAdapter)
                 initAdapterSetList()
             }
@@ -291,7 +291,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      * recyclerview. But it preserves the order of the items, and hence, a header will have its corresponding items
      * coming after it
      */
-    private fun flattenList(list: List<IContent>): MutableList<IContent> {
+    private fun flattenList(list: List<IContent>): List<IContent> {
         return IContent.flattenList(list)
     }
 
