@@ -1,7 +1,8 @@
 # GenericRecyclerView
 This is a recyclerview with all provided classes that are needed for it to function.
 
-You can use this recyclerview to create a list objects that can have nested headers.
+You can use this recyclerview to create a list of objects that can have nested headers and footers. Almost any combination of
+list can be made very easily and it does all the heavy lifting for you.
 
 Plus it has convenience functions that handle
 
