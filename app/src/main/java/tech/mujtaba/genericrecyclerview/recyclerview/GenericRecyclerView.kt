@@ -12,6 +12,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import tech.mujtaba.genericrecyclerview.R
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IHideable
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.ISelectable
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContent
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContentHeader
 
@@ -333,6 +335,13 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
             this.content = content
             this.content?.initView(itemView)
             this.content?.populateView(itemView)
+            if (content is IHideable) {
+                content.view = itemView
+                content.handleVisibility()
+            }
+            if (content is ISelectable) {
+                content.handleSelectedState()
+            }
         }
     }
 

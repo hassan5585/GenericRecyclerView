@@ -5,6 +5,7 @@ import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 import kotlin.reflect.KClass
 
 class Extensions {
+
     /**
      * Call this method to find out whether the IContent object is an IModel as well of
      * the right type
@@ -31,5 +32,12 @@ class Extensions {
      */
     fun List<IContent>.flatten() : List<IContent>{
         return IContent.flattenList(this)
+    }
+
+    /**
+     * Convenience method to unflatten a list
+     */
+    fun List<IContent>.unflatten(): List<IContent> {
+        return IContent.unFlattenList(this)
     }
 }
