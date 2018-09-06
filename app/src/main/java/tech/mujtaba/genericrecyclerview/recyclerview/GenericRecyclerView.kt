@@ -12,6 +12,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import tech.mujtaba.genericrecyclerview.R
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IClickable
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IHideable
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.ISelectable
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContent
@@ -318,7 +319,11 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
     private class GenericViewHolder(itemView: View) : ViewHolder(itemView) {
         private var content: IContent? = null
         private val clickListener: View.OnClickListener = OnClickListener {
-            content?.onClick()
+            content?.let {
+                if (it is IClickable) {
+                    it.onClick()
+                }
+            }
         }
 
         init {

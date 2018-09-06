@@ -16,13 +16,6 @@ interface IContent {
      */
     fun getViewResource(): Int
 
-    /**
-     * Will be automatically invoked when this cell is clicked. If you want to react to the click,
-     * override this method
-     */
-    fun onClick() {
-        clickListener?.onClick(this)
-    }
 
     /**
      * A default equals function you can use for comparisons
@@ -75,13 +68,6 @@ interface IContent {
         return 0
     }
 
-    /**
-     * Allows you to provide a click listener when building an IContent object
-     * and the listener will be notified of any clicks on the IContent
-     */
-    val clickListener : IClickListener?
-
-
 
     companion object {
 
@@ -120,7 +106,4 @@ interface IContent {
 
     }
 
-    interface IClickListener {
-        fun onClick(content : IContent)
-    }
 }
