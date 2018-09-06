@@ -84,17 +84,11 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
             resetFilter()
             val tempList: MutableList<IContent> = mutableListOf()
             tempList.addAll(unFlattenedList)
-            if (parent == null) {
-                for (content in tempList) {
-                    if (content is IContentHeader) {
-                        content.sort()
-                    }
-                }
-            } else {
-                for (content in tempList) {
-                    if (content is IContentHeader && content == parent) {
-                        content.sort()
-                    }
+            tempList.forEach {
+                if (parent == null && it is IContentHeader) {
+                    it.sort()
+                }else if (parent != null && it == parent) {
+                    (it as IContentHeader).sort()
                 }
             }
             listUsedForAdapter.clear()
