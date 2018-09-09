@@ -52,17 +52,25 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      * Use this method to replace the list used by this recycler view. It replaces the entire list
      * and is not smart about it. Try to use the append function because that caters to the content
      * already present in the list
+     * @param shouldUpdate Whether to update the already present list, or completely replace it
      */
-    fun setList(providedList: List<IContent>?) {
+    fun setList(providedList: List<IContent>?, shouldUpdate : Boolean = true) {
         providedList?.let {
-            if (it.isNotEmpty()) {
+            val flattenedList = flattenList(it)
+            if (listUsedForAdapter.isNotEmpty() && shouldUpdate) {
+                listUsedForAdapter.forEach {it2 ->
+                    if (flattenedList.contains(it2)) {
+                        listUsedForAdapter[listUsedForAdapter.indexOf(it2)] = flattenedList[flattenedList.indexOf(it2)]
+                    }
+                }
+            }else {
                 listUsedForAdapter.clear()
-                unFlattenedList.clear()
-                unFlattenedList.addAll(it)
-                listUsedForAdapter.addAll(flattenList(it))
-                createViewMapping(listUsedForAdapter)
-                initAdapterSetList()
+                listUsedForAdapter.addAll(flattenedList)
             }
+            unFlattenedList.clear()
+            unFlattenedList.addAll(it)
+            createViewMapping(listUsedForAdapter)
+            initAdapterSetList()
         }
     }
 

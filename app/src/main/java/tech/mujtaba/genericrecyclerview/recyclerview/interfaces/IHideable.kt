@@ -11,7 +11,7 @@ interface IHideable {
 
     /**
      * When overriding this property, lateinit it, and the recyclerview
-     * will take care of initializing it
+     * will take care of initializing it. As a consumer, you will not need to use this property
      */
     var view : View
 

@@ -40,4 +40,16 @@ class Extensions {
     fun List<IContent>.unflatten(): List<IContent> {
         return IContent.unFlattenList(this)
     }
+
+    /**
+     * Check whether a value is initialized or not(for lateinit values)
+     */
+    fun Any?.isInitialized(receiver: Any?) : Boolean{
+        return try {
+            receiver
+            true
+        }catch (e : UninitializedPropertyAccessException){
+            false
+        }
+    }
 }
