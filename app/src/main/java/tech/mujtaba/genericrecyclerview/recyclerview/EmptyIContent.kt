@@ -12,7 +12,6 @@ import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
  * But this is just here to make stuff easier
  */
 class EmptyIContent(override var model: String) : IContent, IModel<String> {
-    override val clickListener: IContent.IClickListener? = null
 
     private companion object {
         //A Random value so it does not get mixed with your provided item type

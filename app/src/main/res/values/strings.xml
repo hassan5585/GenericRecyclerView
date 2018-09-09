@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GenericRecyclerView</string>
+    <string name="text_missing_layout">Could not find out layout ID for this cell</string>
 </resources>

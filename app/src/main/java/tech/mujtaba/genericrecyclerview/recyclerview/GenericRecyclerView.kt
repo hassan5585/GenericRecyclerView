@@ -298,7 +298,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder {
             val viewInflateId = viewMapWithResourceIds[viewType]
             return GenericViewHolder(LayoutInflater.from(context).inflate(viewInflateId
-                    ?: R.layout.empty_recycler_view_item, parent, false))
+                    ?: R.layout.missing_view, parent, false))
         }
 
         override fun getItemViewType(position: Int): Int {
