@@ -11,7 +11,7 @@ interface IHideable {
 
     /**
      * When overriding this property, lateinit it, and the recyclerview
-     * will take care of initializing it. As a consumer, you will not need to use this property
+     * will take care of initializing it
      */
     var view : View
 
@@ -20,6 +20,7 @@ interface IHideable {
      * value directly. This is meant to be used only as a getter property
      */
     var isHidden : Boolean
+
 
     /**
      * Use this method to change the objects visibility
@@ -50,9 +51,14 @@ interface IHideable {
      * You don't have to call this method. The recyclerview does this for you
      */
     fun handleVisibility() {
-        if (isHidden) {
-            view.visibility = hideMode()
-        }else view.visibility = View.VISIBLE
+        try {
+            if (isHidden) {
+                view.visibility = hideMode()
+            } else view.visibility = View.VISIBLE
+        } catch (e: UninitializedPropertyAccessException) {
+            e.printStackTrace()
+        }
+
     }
-    
+
 }

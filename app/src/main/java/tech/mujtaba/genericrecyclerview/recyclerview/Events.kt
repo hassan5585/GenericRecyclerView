@@ -1,0 +1,3 @@
+package tech.mujtaba.genericrecyclerview.recyclerview
+
+class OnScrollEvent

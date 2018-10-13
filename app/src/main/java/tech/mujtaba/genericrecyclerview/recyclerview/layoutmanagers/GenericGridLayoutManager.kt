@@ -9,8 +9,15 @@ import tech.mujtaba.genericrecyclerview.recyclerview.GenericRecyclerView
 /**
  * This layout manager only works with a GenericRecyclerView because it's span size is dependant
  * on the recyclerview items being an IContent Object
+ *
+ * The nice thing is this grid layout manager can be used as a linearlayoutmanager by just providing a spancount of 1 while
+ * creating it. It takes care of the rest
+ *
+ *
+ * When using this class, please make sure that all IContent objects you pass the recyclerview override and return the spansize
+ * they want. The default value is 1
  */
-class GenericLayoutManager(val recyclerView: GenericRecyclerView, context : Context, spanCount : Int, orientationInt: Int)
+class GenericGridLayoutManager(val recyclerView: GenericRecyclerView, context : Context, spanCount : Int, orientationInt: Int)
     : GridLayoutManager(context,spanCount,orientationInt,false) {
 
 

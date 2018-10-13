@@ -1,8 +1,6 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
+package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
 import android.view.View
-import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 
 /**
@@ -15,6 +13,14 @@ interface IContent {
      * return it back in the populateView function
      */
     fun getViewResource(): Int
+
+  /*  *//**
+     * Return a view object that will be attached to the recyclerview. Use this method instead of getViewResource()
+     * if you want to use a custom view. Do not use both
+     *//*
+    fun getViewObject() : View? {
+        return null
+    }*/
 
 
     /**
@@ -69,12 +75,14 @@ interface IContent {
     }
 
 
+
+
     companion object {
 
         /**
          * Convenience method to flatten a list of IContent objects
          */
-        fun flattenList(list: List<IContent>): List<IContent> {
+        fun <T : IContent> flattenList(list: List<T>): MutableList<IContent> {
             val tempList: MutableList<IContent> = mutableListOf()
             for (t in list) {
                 tempList.add(t)
@@ -88,19 +96,9 @@ interface IContent {
         }
 
         /**
-         * Wraps the flattenlist function in an observable for easier flattening on a
-         * background thread
-         */
-        fun flattenListObservable(list: List<IContent>) : Single<List<IContent>>{
-            return Single.defer {
-                Single.just(flattenList(list))
-            }.subscribeOn(Schedulers.io())
-        }
-
-        /**
          * Un-flattens the list provided and returns it.
          */
-        fun unFlattenList(list: List<IContent>): List<IContent> {
+        fun <T : IContent> unFlattenList(list: List<T>): List<IContent> {
             return list.filter { it !is IContentChild }
         }
 

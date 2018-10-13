@@ -1,4 +1,4 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
+package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
 /**
  * Represent one cell that is a child of some other cell of type IContentHeader
@@ -24,5 +24,6 @@ interface IContentChild : IContent {
     fun getPreferredPositionInParent(): Int {
         return 0
     }
+
 
 }

@@ -3,7 +3,7 @@ package tech.mujtaba.genericrecyclerview.recyclerview
 import android.view.View
 import android.widget.TextView
 import tech.mujtaba.genericrecyclerview.R
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 
 /**

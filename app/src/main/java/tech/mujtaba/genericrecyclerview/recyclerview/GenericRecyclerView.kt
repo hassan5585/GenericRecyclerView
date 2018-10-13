@@ -7,20 +7,23 @@ import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
+import org.greenrobot.eventbus.EventBus
 import tech.mujtaba.genericrecyclerview.R
+import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentHeader
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IClickable
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IHideable
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.ISelectable
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContent
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells.IContentHeader
 
 open class GenericRecyclerView @JvmOverloads constructor(context: Context,
-                               attrs: AttributeSet? = null,
-                               defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
+                                                         attrs: AttributeSet? = null,
+                                                         defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
 
     var listUsedForAdapter: MutableList<IContent> = mutableListOf()
         private set
@@ -29,6 +32,9 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
     private val viewMapWithResourceIds: MutableMap<Int, Int> = mutableMapOf()
     private var adapter: GenericAdapter? = null
     private var isInFilteredState = false
+    private val disposableBag by lazy {
+        CompositeDisposable()
+    }
 
     // Set this property to show an empty view when filtering does not return anything.
     // If you do not set a value here, it will just show an empty list
@@ -36,6 +42,10 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
 
     init {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
+    }
+
+    fun notifyAdapter() {
+        adapter?.notifyDataSetChanged()
     }
 
     /**
@@ -52,18 +62,20 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      * Use this method to replace the list used by this recycler view. It replaces the entire list
      * and is not smart about it. Try to use the append function because that caters to the content
      * already present in the list
-     * @param shouldUpdate Whether to update the already present list, or completely replace it
+     *
+     * @param shouldUpdate Whether to update the already present list, or completely replace it. If you set this to true,
+     * it will not add any new items, but just update the ones already there
      */
-    fun setList(providedList: List<IContent>?, shouldUpdate : Boolean = true) {
+    fun setList(providedList: List<IContent>?, shouldUpdate: Boolean = false) {
         providedList?.let {
             val flattenedList = flattenList(it)
             if (listUsedForAdapter.isNotEmpty() && shouldUpdate) {
-                listUsedForAdapter.forEach {it2 ->
+                listUsedForAdapter.forEach { it2 ->
                     if (flattenedList.contains(it2)) {
                         listUsedForAdapter[listUsedForAdapter.indexOf(it2)] = flattenedList[flattenedList.indexOf(it2)]
                     }
                 }
-            }else {
+            } else {
                 listUsedForAdapter.clear()
                 listUsedForAdapter.addAll(flattenedList)
             }
@@ -96,7 +108,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
             tempList.forEach {
                 if (parent == null && it is IContentHeader) {
                     it.sort()
-                }else if (parent != null && it == parent) {
+                } else if (parent != null && it == parent) {
                     (it as IContentHeader).sort()
                 }
             }
@@ -119,6 +131,9 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
             }
         } else {
             // TODO Add smooth scrolling code here
+            when (layoutManager) {
+
+            }
         }
     }
 
@@ -162,7 +177,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                     sizeToAppend = it1.size
                     listUsedForAdapter.addAll(it1)
                     createViewMapping(listUsedForAdapter)
-                }
+                }.addTo(disposableBag)
         return sizeToAppend
     }
 
@@ -172,8 +187,10 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      */
     fun applyFunction(function: ((IContent) -> Unit)?) {
         function?.let {
-            listUsedForAdapter.map(it)
-            adapter?.notifyDataSetChanged()
+            if (adapter != null && listUsedForAdapter.isNotEmpty()) {
+                listUsedForAdapter.map(it)
+                adapter?.notifyDataSetChanged()
+            }
         }
     }
 
@@ -204,7 +221,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                                 val index = listUsedForAdapter.indexOf(it2)
                                 listUsedForAdapter[index] = it2
                                 adapter?.notifyItemChanged(index)
-                            }
+                            }.addTo(disposableBag)
                 }
 
 
@@ -259,7 +276,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
                         adapter?.notifyDataSetChanged()
-                    }
+                    }.addTo(disposableBag)
         } else {
             resetFilter()
         }
@@ -296,7 +313,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      * recyclerview. But it preserves the order of the items, and hence, a header will have its corresponding items
      * coming after it
      */
-    private fun flattenList(list: List<IContent>): List<IContent> {
+    private fun flattenList(list: List<IContent>): MutableList<IContent> {
         return IContent.flattenList(list)
     }
 
@@ -306,7 +323,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder {
             val viewInflateId = viewMapWithResourceIds[viewType]
             return GenericViewHolder(LayoutInflater.from(context).inflate(viewInflateId
-                    ?: R.layout.missing_view, parent, false))
+                    ?: R.layout.empty_recycler_view_item, parent, false))
         }
 
         override fun getItemViewType(position: Int): Int {
@@ -342,14 +359,15 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
             this.content = content
             this.content?.initView(itemView)
             this.content?.populateView(itemView)
-            if (content is IHideable) {
-                content.view = itemView
-                content.handleVisibility()
-            }
             if (content is ISelectable) {
                 content.handleSelectedState()
             }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        disposableBag.clear()
+        super.onDetachedFromWindow()
     }
 
     private class ListException(exception: String) : Exception(exception) {

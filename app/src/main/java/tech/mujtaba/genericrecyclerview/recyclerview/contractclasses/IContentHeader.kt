@@ -1,5 +1,6 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
+package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
+import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IHideable
 import java.util.*
 
 /**
@@ -14,6 +15,19 @@ interface IContentHeader : IContent {
     var children : MutableList<IContentChild>
 
 
+    /**
+     * Change child view visibility
+     */
+    fun childVisibility(shouldHide : Boolean) {
+        children.forEach {
+            if (it is IHideable) {
+                it.visibility(shouldHide)
+            }
+            if (it is IContentHeader) {
+                it.childVisibility(shouldHide)
+            }
+        }
+    }
 
     /**
      * Call this function to make sure your children know of you as a parent. If you don't,

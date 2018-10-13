@@ -1,4 +1,4 @@
-package tech.mujtaba.genericrecyclerview.recyclerview.interfaces.contentcells
+package tech.mujtaba.genericrecyclerview.recyclerview.contractclasses
 
 import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
 
