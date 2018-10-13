@@ -5,6 +5,10 @@ import tech.mujtaba.genericrecyclerview.R
 import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentChild
 import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentHeader
 
+/**
+ * An empty parent with zero height, for those cases where you want a parent. But don't want it
+ * to show up
+ */
 class EmptyContentParent : IContentHeader {
 
     private companion object {
