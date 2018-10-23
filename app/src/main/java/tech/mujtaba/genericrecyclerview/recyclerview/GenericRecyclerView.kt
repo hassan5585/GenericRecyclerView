@@ -243,7 +243,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      */
     fun append(item: IContent?) {
         item?.let {
-            append(mutableListOf(it))
+            append(listOf(it))
         }
     }
 
@@ -337,11 +337,12 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
         override fun onBindViewHolder(holder: GenericViewHolder, position: Int) {
             holder.setData(listUsedForAdapter[position])
         }
-
     }
 
 
+
     private class GenericViewHolder(itemView: View) : ViewHolder(itemView) {
+
         private var content: IContent? = null
         private val clickListener: View.OnClickListener = OnClickListener {
             content?.let {
@@ -350,6 +351,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
                 }
             }
         }
+        private var areViewsInit = false
 
         init {
             itemView.setOnClickListener(clickListener)
@@ -357,7 +359,10 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
 
         fun setData(content: IContent) {
             this.content = content
-            this.content?.initView(itemView)
+            if (!areViewsInit) {
+                this.content?.initView(itemView)
+                areViewsInit = true
+            }
             this.content?.populateView(itemView)
             if (content is ISelectable) {
                 content.handleSelectedState()
