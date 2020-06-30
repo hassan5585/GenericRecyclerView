@@ -1,39 +1,24 @@
 package tech.mujtaba.genericrecyclerview.recyclerview
 
 import android.view.View
-import android.widget.TextView
-import tech.mujtaba.genericrecyclerview.R
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IModel
+import tech.mujtaba.genericrecyclerview.recyclerview.content.IContent
 
 /**
  * An empty cell that you can provide to the generic recycler view for it to show
- * when filtering results in an empty list. You can provide your own version of this.
+ * when no list has ever been set on the recyclerview. You can provide your own version of this.
  * But this is just here to make stuff easier
+ *
+ * Please make sure that your provided item types does not conflict with the one this class uses
  */
-class EmptyIContent(override var model: String) : IContent, IModel<String> {
+class EmptyIContent(private val emptyViewResId: Int) : IContent {
 
-    private companion object {
-        //A Random value so it does not get mixed with your provided item type
-        const val ITEM_TYPE : Int = 324126
-    }
+    override fun getViewResource() = emptyViewResId
 
-    private lateinit var messageText : TextView
+    override fun isContentSameAs(providedObject: IContent?) = false
 
-    override fun getViewResource(): Int {
-        return R.layout.empty_recycler_view_item
-    }
+    override fun getItemType() = ITEM_TYPE_GENERIC_EMPTY
 
-    override fun getItemType(): Int {
-        return ITEM_TYPE
-    }
+    override fun populateView(view: View) {}
 
-    override fun initView(view: View) {
-        messageText = view.findViewById(R.id.messageText)
-    }
-
-    override fun populateView(view: View) {
-        messageText.text = model
-    }
-
+    override fun isSameItemAs(providedObject: IContent?) = false
 }

@@ -1,3 +1,3 @@
 package tech.mujtaba.genericrecyclerview.recyclerview
 
-class OnScrollEvent
+const val ITEM_TYPE_GENERIC_EMPTY = 200

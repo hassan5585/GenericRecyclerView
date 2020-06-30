@@ -1,8 +1,8 @@
 package tech.mujtaba.genericrecyclerview.recyclerview.layoutmanagers
 
 import android.content.Context
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import tech.mujtaba.genericrecyclerview.recyclerview.GenericRecyclerView
 
 
@@ -17,19 +17,17 @@ import tech.mujtaba.genericrecyclerview.recyclerview.GenericRecyclerView
  * When using this class, please make sure that all IContent objects you pass the recyclerview override and return the spansize
  * they want. The default value is 1
  */
-class GenericGridLayoutManager(val recyclerView: GenericRecyclerView, context : Context, spanCount : Int, orientationInt: Int)
-    : GridLayoutManager(context,spanCount,orientationInt,false) {
+class GenericGridLayoutManager(context: Context, spanCount: Int, orientationInt: Int)
+    : GridLayoutManager(context, spanCount, orientationInt, false) {
 
-
-    init {
+    override fun onAttachedToWindow(view: RecyclerView?) {
+        super.onAttachedToWindow(view)
         spanSizeLookup = object : SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                return recyclerView.listUsedForAdapter[position].getSpanSize()
+                return (view as? GenericRecyclerView)?.externalList?.get(position)?.getSpanSize()
+                        ?: 1
             }
         }
     }
-
-
-
 
 }

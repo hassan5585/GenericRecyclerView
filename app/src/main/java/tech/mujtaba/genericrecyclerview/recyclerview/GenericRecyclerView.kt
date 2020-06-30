@@ -1,56 +1,53 @@
 package tech.mujtaba.genericrecyclerview.recyclerview
 
 import android.content.Context
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.schedulers.Schedulers
-import org.greenrobot.eventbus.EventBus
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.*
 import tech.mujtaba.genericrecyclerview.R
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContent
-import tech.mujtaba.genericrecyclerview.recyclerview.contractclasses.IContentHeader
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.IClickable
-import tech.mujtaba.genericrecyclerview.recyclerview.interfaces.ISelectable
+import tech.mujtaba.genericrecyclerview.recyclerview.content.IContent
+import tech.mujtaba.genericrecyclerview.recyclerview.actions.IClickable
+import java.util.concurrent.Executors
 
-open class GenericRecyclerView @JvmOverloads constructor(context: Context,
-                                                         attrs: AttributeSet? = null,
-                                                         defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
+class GenericRecyclerView @JvmOverloads constructor(context: Context,
+                                                    attrs: AttributeSet? = null,
+                                                    defStyle: Int = 0) : RecyclerView(context, attrs) {
 
-    var listUsedForAdapter: MutableList<IContent> = mutableListOf()
-        private set
-    private var unFilteredList: MutableList<IContent> = mutableListOf()
-    private var unFlattenedList: MutableList<IContent> = mutableListOf()
-    private val viewMapWithResourceIds: MutableMap<Int, Int> = mutableMapOf()
+    val externalList: List<IContent>
+        get() = internalList
+    private var internalList: MutableList<IContent> = mutableListOf()
     private var adapter: GenericAdapter? = null
-    private var isInFilteredState = false
-    private val disposableBag by lazy {
-        CompositeDisposable()
+
+    // An empty view when there is nothing provided to the recyclerview to show
+    private var emptyViewResId: Int = 0
+
+    private val emptyIContent by lazy {
+        EmptyIContent(emptyViewResId)
     }
 
-    // Set this property to show an empty view when filtering does not return anything.
-    // If you do not set a value here, it will just show an empty list
-    var emptyFilter: IContent? = null
+    private val coroutineDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
 
     init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
+        layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        attrs?.let {
+            val typedArray = context.obtainStyledAttributes(it, R.styleable.GenericRecyclerView)
+            emptyViewResId = typedArray.getResourceId(R.styleable.GenericRecyclerView_emptyView, 0)
+            typedArray.recycle()
+            setList(listOf(emptyIContent))
+        }
     }
 
-    fun notifyAdapter() {
-        adapter?.notifyDataSetChanged()
-    }
 
     /**
      * This view will not let you set any other adapter other than a Generic Adapter
-     * It will throw an exception if you try to set
      */
     override fun setAdapter(adapter: Adapter<*>?) {
         if (adapter is GenericAdapter) {
@@ -58,63 +55,25 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
         } else throw ListException(ListException.EXCEPTION_WRONG_ADAPTER)
     }
 
-    /**
-     * Use this method to replace the list used by this recycler view. It replaces the entire list
-     * and is not smart about it. Try to use the append function because that caters to the content
-     * already present in the list
-     *
-     * @param shouldUpdate Whether to update the already present list, or completely replace it. If you set this to true,
-     * it will not add any new items, but just update the ones already there
-     */
-    fun setList(providedList: List<IContent>?, shouldUpdate: Boolean = false) {
+    fun setList(providedList: List<IContent>?) {
         providedList?.let {
-            val flattenedList = flattenList(it)
-            if (listUsedForAdapter.isNotEmpty() && shouldUpdate) {
-                listUsedForAdapter.forEach { it2 ->
-                    if (flattenedList.contains(it2)) {
-                        listUsedForAdapter[listUsedForAdapter.indexOf(it2)] = flattenedList[flattenedList.indexOf(it2)]
+            if (it.isEmpty() && emptyViewResId != 0) {
+                setList(listOf(emptyIContent))
+            } else GlobalScope.launch(coroutineDispatcher) {
+                try {
+                    val diffResult = DiffUtil.calculateDiff(GenericDiffUtilCallback(it, externalList))
+                    GlobalScope.launch(Dispatchers.Main) {
+                        if (adapter == null) {
+                            adapter = GenericAdapter()
+                            setAdapter(adapter)
+                        }
+                        internalList = providedList.toMutableList()
+                        diffResult.dispatchUpdatesTo(adapter!!)
                     }
-                }
-            } else {
-                listUsedForAdapter.clear()
-                listUsedForAdapter.addAll(flattenedList)
-            }
-            unFlattenedList.clear()
-            unFlattenedList.addAll(it)
-            createViewMapping(listUsedForAdapter)
-            initAdapterSetList()
-        }
-    }
-
-    private fun initAdapterSetList() {
-        if (adapter == null) {
-            adapter = GenericAdapter()
-            setAdapter(adapter)
-        } else {
-            adapter?.notifyDataSetChanged()
-        }
-    }
-
-    /*
-     Pass in a specific parent object, if you just want to sort within that object's children.
-     Otherwise, every parent in the listUsedForAdapter will be asked to sort its children
-     Also, any filter that you have applied will be removed if you call this function
-      */
-    fun sort(parent: IContentHeader? = null) {
-        adapter?.let {
-            resetFilter()
-            val tempList: MutableList<IContent> = mutableListOf()
-            tempList.addAll(unFlattenedList)
-            tempList.forEach {
-                if (parent == null && it is IContentHeader) {
-                    it.sort()
-                } else if (parent != null && it == parent) {
-                    (it as IContentHeader).sort()
+                } catch (exception: Exception) {
+                    // Do Nothing
                 }
             }
-            listUsedForAdapter.clear()
-            listUsedForAdapter.addAll(flattenList(tempList))
-            it.notifyDataSetChanged()
         }
     }
 
@@ -125,9 +84,9 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
     fun scrollToContent(content: IContent, isSmooth: Boolean = false) {
         if (!isSmooth) {
             when (layoutManager) {
-                is LinearLayoutManager -> (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(listUsedForAdapter.indexOf(content), 0)
-                is GridLayoutManager -> (layoutManager as GridLayoutManager).scrollToPositionWithOffset(listUsedForAdapter.indexOf(content), 0)
-                else -> layoutManager?.scrollToPosition(listUsedForAdapter.indexOf(content))
+                is LinearLayoutManager -> (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(internalList.indexOf(content), 0)
+                is GridLayoutManager -> (layoutManager as GridLayoutManager).scrollToPositionWithOffset(internalList.indexOf(content), 0)
+                else -> layoutManager?.scrollToPosition(internalList.indexOf(content))
             }
         } else {
             // TODO Add smooth scrolling code here
@@ -144,7 +103,7 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
      */
     fun scrollToContent(filterPredicate: ((content: IContent) -> Boolean)?, isSmooth: Boolean = false) {
         filterPredicate?.let {
-            for (c in listUsedForAdapter) {
+            for (c in internalList) {
                 if (it(c)) {
                     scrollToContent(c, isSmooth)
                     break
@@ -153,226 +112,54 @@ open class GenericRecyclerView @JvmOverloads constructor(context: Context,
         }
     }
 
-    /**
-     * Removes any sorting from the listUsedForAdapter and brings it back to the original sort order
-     */
-    fun removeSort() {
-        adapter?.let {
-            listUsedForAdapter.clear()
-            listUsedForAdapter.addAll(flattenList(unFlattenedList))
-            it.notifyDataSetChanged()
-        }
-    }
-
-
-    private fun flattenListAndReturnAppendableList(l: List<IContent>): Int {
-        val tempList = flattenList(l)
-        var sizeToAppend = 0
-        Observable.fromIterable(tempList)
-                .filter {
-                    !listUsedForAdapter.contains(it)
-                }
-                .toList()
-                .subscribe { it1 ->
-                    sizeToAppend = it1.size
-                    listUsedForAdapter.addAll(it1)
-                    createViewMapping(listUsedForAdapter)
-                }.addTo(disposableBag)
-        return sizeToAppend
-    }
-
-    /**
-     * Apply a function to the entire list of contents. If the list is in a filtered state,
-     * the function will apply to only the filtered items
-     */
-    fun applyFunction(function: ((IContent) -> Unit)?) {
-        function?.let {
-            if (adapter != null && listUsedForAdapter.isNotEmpty()) {
-                listUsedForAdapter.map(it)
-                adapter?.notifyDataSetChanged()
-            }
-        }
-    }
-
-
-    /**
-     * Use this method to display a listUsedForAdapter to the view. If the view already has a listUsedForAdapter, it will append your listUsedForAdapter at the end.
-     * Otherwise it will create a new adapter and set your listUsedForAdapter there.
-     */
-    fun append(providedList: List<IContent>?, shouldCheckIfAlreadyThere: Boolean = true) {
-        providedList?.let {
-            unFlattenedList.addAll(it)
-            val size = listUsedForAdapter.size
-            if (size == 0) {
-                setList(it)
-            } else {
-                if (shouldCheckIfAlreadyThere) {
-                    //Update old items
-
-                    Observable.defer {
-                        Observable.fromIterable(flattenList(it))
-                                .filter { it2 ->
-                                    listUsedForAdapter.contains(it2)
-                                }
-
-                    }.subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe { it2 ->
-                                val index = listUsedForAdapter.indexOf(it2)
-                                listUsedForAdapter[index] = it2
-                                adapter?.notifyItemChanged(index)
-                            }.addTo(disposableBag)
-                }
-
-
-                //Append new Items to the list
-                Observable.fromCallable {
-                    flattenListAndReturnAppendableList(it)
-                }.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { it2 ->
-                            adapter?.notifyItemRangeInserted(size, it2)
-                        }
-            }
-        }
-    }
-
-    /**
-     * Append a single item to the end of the recyclerView
-     * If the item added has subItems, those will also be added beneath it
-     */
-    fun append(item: IContent?) {
-        item?.let {
-            append(listOf(it))
-        }
-    }
-
-
-    /**
-     * Use this function to filter this listUsedForAdapter.
-     * @param filterPredicate This is a function that takes in a IContent value and returns a boolean
-     * If it returns true for a value, that will be added to the listUsedForAdapter, otherwise it will be removed
-     * If you pass in a null to this function, it will clear all filters and return to the original
-     * state of the list
-     */
-    fun filter(filterPredicate: ((content: IContent) -> Boolean)?) {
-        if (filterPredicate != null) {
-            Observable.fromCallable {
-                if (!isInFilteredState) {
-                    unFilteredList.addAll(listUsedForAdapter)
-                }
-                isInFilteredState = true
-                listUsedForAdapter.clear()
-                listUsedForAdapter.addAll(unFilteredList.filter(filterPredicate))
-                if (listUsedForAdapter.size == 0) {
-                    emptyFilter?.let {
-                        //Empty view added to list in case of empty filter
-                        listUsedForAdapter.add(it)
-
-                    }
-                }
-                createViewMapping(listUsedForAdapter)
-            }.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        adapter?.notifyDataSetChanged()
-                    }.addTo(disposableBag)
-        } else {
-            resetFilter()
-        }
-    }
-
-    /**
-     * Use this function to clear the filter and return the listUsedForAdapter to its original state
-     */
-    fun resetFilter() {
-        if (isInFilteredState) {
-            isInFilteredState = false
-            listUsedForAdapter.clear()
-            listUsedForAdapter.addAll(unFilteredList)
-            createViewMapping(listUsedForAdapter)
-            unFilteredList.clear()
-            adapter?.notifyDataSetChanged()
-        }
-    }
-
-
-    /**
-     * Creates a map of different viewtypes and their corresponding xml resources to inflate
-     */
-    private fun createViewMapping(list: List<IContent>) {
-        viewMapWithResourceIds.clear()
-        for (content in list) {
-            viewMapWithResourceIds[content.getItemType()] = content.getViewResource()
-        }
-    }
-
-
-    /**
-     * Will flatten any IContent listUsedForAdapter to make all IContent objects equal to the
-     * recyclerview. But it preserves the order of the items, and hence, a header will have its corresponding items
-     * coming after it
-     */
-    private fun flattenList(list: List<IContent>): MutableList<IContent> {
-        return IContent.flattenList(list)
-    }
-
-
     private inner class GenericAdapter : Adapter<GenericViewHolder>() {
 
+        /**
+         * If a viewInflateId is null in this method, it will cause a crash
+         */
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder {
-            val viewInflateId = viewMapWithResourceIds[viewType]
+            val firstItemContent = internalList.firstOrNull { it.getItemType() == viewType }
+            val viewInflateId = firstItemContent?.getViewResource()
             return GenericViewHolder(LayoutInflater.from(context).inflate(viewInflateId
-                    ?: R.layout.empty_recycler_view_item, parent, false))
+                    ?: 0, parent, false),
+                    firstItemContent is IClickable)
         }
 
         override fun getItemViewType(position: Int): Int {
-            return listUsedForAdapter[position].getItemType()
+            return internalList[position].getItemType()
         }
 
         override fun getItemCount(): Int {
-            return listUsedForAdapter.size
+            return internalList.size
         }
 
         override fun onBindViewHolder(holder: GenericViewHolder, position: Int) {
-            holder.setData(listUsedForAdapter[position])
+            holder.setData(internalList[position])
         }
     }
 
 
-
-    private class GenericViewHolder(itemView: View) : ViewHolder(itemView) {
+    private class GenericViewHolder(itemView: View, isClickable: Boolean) : ViewHolder(itemView) {
 
         private var content: IContent? = null
-        private val clickListener: View.OnClickListener = OnClickListener {
-            content?.let {
-                if (it is IClickable) {
-                    it.onClick()
+        private val clickListener: OnClickListener by lazy {
+            OnClickListener {
+                (content as? IClickable)?.run {
+                    onClick(this)
                 }
             }
         }
-        private var areViewsInit = false
 
         init {
-            itemView.setOnClickListener(clickListener)
+            if (isClickable) {
+                itemView.setOnClickListener(clickListener)
+            }
         }
 
         fun setData(content: IContent) {
             this.content = content
-            if (!areViewsInit) {
-                this.content?.initView(itemView)
-                areViewsInit = true
-            }
             this.content?.populateView(itemView)
-            if (content is ISelectable) {
-                content.handleSelectedState()
-            }
         }
-    }
-
-    override fun onDetachedFromWindow() {
-        disposableBag.clear()
-        super.onDetachedFromWindow()
     }
 
     private class ListException(exception: String) : Exception(exception) {
