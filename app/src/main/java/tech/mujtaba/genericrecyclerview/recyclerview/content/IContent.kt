@@ -18,14 +18,11 @@ interface IContent {
     /**
      * Distinguish between two IContent objects on the list
      *
-     * If you do not wish to depend on the ID, please override this method
      */
-    fun isSameItemAs(providedObject: IContent?): Boolean {
-        return providedObject?.getId() == getId()
-    }
+    fun isSameItemAs(providedObject: IContent?): Boolean
 
     /**
-     *
+     * Given that the items are the same, are their contents the same as well
      */
     fun isContentSameAs(providedObject: IContent?): Boolean
 
@@ -50,12 +47,4 @@ interface IContent {
      * according to any data that you may have
      */
     fun populateView(view: View)
-
-
-    /**
-     * Override to provide a valid ID
-     */
-    fun getId(): Int {
-        return 0
-    }
 }

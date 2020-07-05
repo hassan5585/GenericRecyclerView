@@ -26,7 +26,7 @@ class GenericRecyclerView @JvmOverloads constructor(context: Context,
     private var internalList: MutableList<IContent> = mutableListOf()
     private var adapter: GenericAdapter? = null
 
-    // An empty view when there is nothing provided to the recyclerview to show
+    // An empty view when there is nothing provided to the recyclerview to show. This will be the first view shown when the recyclerview is created and no list is set
     private var emptyViewResId: Int = 0
 
     private val emptyIContent by lazy {
@@ -36,7 +36,6 @@ class GenericRecyclerView @JvmOverloads constructor(context: Context,
     private val coroutineDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
 
     init {
-        layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(it, R.styleable.GenericRecyclerView)
             emptyViewResId = typedArray.getResourceId(R.styleable.GenericRecyclerView_emptyView, 0)
@@ -72,41 +71,6 @@ class GenericRecyclerView @JvmOverloads constructor(context: Context,
                     }
                 } catch (exception: Exception) {
                     // Do Nothing
-                }
-            }
-        }
-    }
-
-    /**
-     * Use this function to scroll to the position of any IContent object in the list
-     * TODO Add smooth scrolling
-     */
-    fun scrollToContent(content: IContent, isSmooth: Boolean = false) {
-        if (!isSmooth) {
-            when (layoutManager) {
-                is LinearLayoutManager -> (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(internalList.indexOf(content), 0)
-                is GridLayoutManager -> (layoutManager as GridLayoutManager).scrollToPositionWithOffset(internalList.indexOf(content), 0)
-                else -> layoutManager?.scrollToPosition(internalList.indexOf(content))
-            }
-        } else {
-            // TODO Add smooth scrolling code here
-            when (layoutManager) {
-
-            }
-        }
-    }
-
-
-    /**
-     * If you want to provide a predicate to start the scroll, use this function. It scrolls to the first
-     * value that matches that predicate and ignores the rest
-     */
-    fun scrollToContent(filterPredicate: ((content: IContent) -> Boolean)?, isSmooth: Boolean = false) {
-        filterPredicate?.let {
-            for (c in internalList) {
-                if (it(c)) {
-                    scrollToContent(c, isSmooth)
-                    break
                 }
             }
         }
