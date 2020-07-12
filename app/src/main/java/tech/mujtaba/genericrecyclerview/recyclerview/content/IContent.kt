@@ -37,8 +37,10 @@ interface IContent {
      *  Try to return a unique item type here, otherwise you might have problems with
      *  recycler view inflating the wrong type of view for you. Aggregate those view Ids in this
      *  interface's companion object
+     *
+     *  Default Implementation just returns the viewresourceID
      */
-    fun getItemType(): Int
+    fun getItemType(): Int = getViewResource()
 
 
     /**

@@ -11,14 +11,13 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$ver.kotlinVersion"
     implementation "androidx.appcompat:appcompat:$ver.appCompat"
     implementation "androidx.recyclerview:recyclerview:$ver.recyclerView"

@@ -2,19 +2,16 @@ package tech.mujtaba.genericrecyclerview.recyclerview
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
 import tech.mujtaba.genericrecyclerview.R
-import tech.mujtaba.genericrecyclerview.recyclerview.content.IContent
 import tech.mujtaba.genericrecyclerview.recyclerview.actions.IClickable
+import tech.mujtaba.genericrecyclerview.recyclerview.content.IContent
 import java.util.concurrent.Executors
 
 class GenericRecyclerView @JvmOverloads constructor(context: Context,
@@ -40,7 +37,9 @@ class GenericRecyclerView @JvmOverloads constructor(context: Context,
             val typedArray = context.obtainStyledAttributes(it, R.styleable.GenericRecyclerView)
             emptyViewResId = typedArray.getResourceId(R.styleable.GenericRecyclerView_emptyView, 0)
             typedArray.recycle()
-            setList(listOf(emptyIContent))
+            if (emptyViewResId != 0) {
+                setList(listOf(emptyIContent))
+            }
         }
     }
 
@@ -55,24 +54,23 @@ class GenericRecyclerView @JvmOverloads constructor(context: Context,
     }
 
     fun setList(providedList: List<IContent>?) {
-        providedList?.let {
-            if (it.isEmpty() && emptyViewResId != 0) {
-                setList(listOf(emptyIContent))
-            } else GlobalScope.launch(coroutineDispatcher) {
-                try {
-                    val diffResult = DiffUtil.calculateDiff(GenericDiffUtilCallback(it, externalList))
-                    GlobalScope.launch(Dispatchers.Main) {
-                        if (adapter == null) {
-                            adapter = GenericAdapter()
-                            setAdapter(adapter)
-                        }
-                        internalList = providedList.toMutableList()
-                        diffResult.dispatchUpdatesTo(adapter!!)
+        val list = if ((providedList == null || providedList.isEmpty()) && emptyViewResId != 0) {
+            listOf(emptyIContent)
+        } else providedList ?: emptyList()
+        try {
+            GlobalScope.launch(coroutineDispatcher) {
+                val diffResult = DiffUtil.calculateDiff(GenericDiffUtilCallback(list, externalList))
+                withContext(Dispatchers.Main) {
+                    if (adapter == null) {
+                        adapter = GenericAdapter()
+                        setAdapter(adapter)
                     }
-                } catch (exception: Exception) {
-                    // Do Nothing
+                    internalList = list.toMutableList()
+                    diffResult.dispatchUpdatesTo(adapter!!)
                 }
             }
+        } catch (exception: Exception) {
+            // Do Nothing
         }
     }
 

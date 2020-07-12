@@ -16,8 +16,6 @@ class EmptyIContent(private val emptyViewResId: Int) : IContent {
 
     override fun isContentSameAs(providedObject: IContent?) = false
 
-    override fun getItemType() = ITEM_TYPE_GENERIC_EMPTY
-
     override fun populateView(view: View) {}
 
     override fun isSameItemAs(providedObject: IContent?) = false
